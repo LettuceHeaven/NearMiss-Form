@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Near Miss Report Form</title>
+  <style>
+    /* Your existing CSS remains the same */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    header {
+      background-color: #3841be;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .form-wrapper {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      overflow-y: auto;
+      justify-content: center;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    form {
+      height: 100%;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      padding: 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .close-button {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-button:hover {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Success Popup Modal -->
+<div id="successModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button">&times;</span>
+    <h2>✅ Thank You for using NearMiss!</h2>
+    <p>Your report has been submitted successfully.</p>
+  </div>
+</div>
+
+  <header>
+    Near Miss Incident Report
+  </header>
+
+  <div class="form-wrapper">
+    <div class="form-container">
+      <!-- Changed action to point to PHP file -->
+      <form id="index" action="submit-near-miss.php" method="post" enctype="multipart/form-data">
+        
+        <label for="DateofIncedent">Date of Incident</label>
+        <input type="date" id="DateofIncedent" name="DateofIncedent" required />
+
+        <label for="TimeofIncedent">Time of Incident</label>
+        <input type="time" id="TimeofIncedent" name="TimeofIncedent" required />
+
+        <label for="TypeofReport">Type of Report</label>
+        <select id="TypeofReport" name="TypeofReport" required>
+          <option value="">-- Type of Report --</option>
+          <option value="Near Miss">Near Miss</option>
+          <option value="Potential Hazard">Potential Hazard</option>
+          <option value="Safety Hazard">Safety Hazard</option>
+        </select>
+
+        <label for="TypeofIncident">Type of Incident</label>
+        <select id="TypeofIncident" name="TypeofIncident" required>
+          <option value="">-- Type of Concern --</option>
+          <option value="Major Accident">Major Accident</option>
+          <option value="Major Near Miss">Major Near Miss</option>
+          <option value="Minor Accident">Minor Accident</option>
+          <option value="Minor Near Miss">Minor Near Miss</option>
+        </select>
+
+        <label for="TypeofConcern">Type of Concern</label>
+        <select id="TypeofConcern" name="TypeofConcern" required>
+          <option value="">-- Type of Concern --</option>
+          <option value="Unsafe Action">Unsafe Action</option>
+          <option value="Unsafe Area Condition">Unsafe Area Condition</option>
+          <option value="Unsafe Equipment Condition">Unsafe Equipment Condition</option>
+          <option value="Unsafe Work Method">Unsafe Work Method</option>
+        </select>
+
+        <label for="Location">Location</label>
+        <input type="text" id="Location" name="Location" placeholder="Enter location" required />
+
+        <label for="Descricbe">Describe the Near Miss</label>
+        <textarea id="Descricbe" name="Descricbe" rows="4" placeholder="Provide details..." required></textarea>
+
+        <label for="ActionTaken">Action Taken</label>
+        <textarea id="ActionTaken" name="ActionTaken" rows="3" placeholder="What was done after the incident?"></textarea>
+
+        <label for="UploadImage">Upload Image (optional)</label>
+        <input type="file" id="UploadImage" name="UploadImage" accept="image/*" />
+
+        <label for="UploadVideo">Upload Video (optional)</label>
+        <input type="file" id="UploadVideo" name="UploadVideo" accept="video/*" />
+
+        <label for="Department">Department</label>
+        <select id="Department" name="Department" required>
+          <option value="">-- Select Department --</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Logistics">Logistics</option>
+          <option value="Production">Production</option>
+          <option value="Warehouse">Warehouse</option>
+          <option value="Quality Assurance">Quality Assurance</option>
+          <option value="Health & Safety">Health & Safety</option>
+          <option value="Human Resources">Human Resources</option>
+        </select>
+
+        <div id="SectorContainer" style="display: none;">
+          <label for="Sector">Sector</label>
+          <select id="Sector" name="Sector">
+            <option value="">-- Select Sector --</option>
+            <option value="Assembly">Assembly</option>
+            <option value="Packaging">Packaging</option>
+            <option value="Testing">Testing</option>
+            <option value="Welding">Welding</option>
+            <option value="Machining">Machining</option>
+          </select>
+        </div>
+
+        <label for="EmployeeID">Employee ID</label>
+        <input type="text" id="EmployeeID" name="EmployeeID" placeholder="Your employee ID" required />
+
+        <label for="ReportedBy">Reported By:</label>
+        <input type="text" id="ReportedBy" name="ReportedBy" placeholder="Reported By" required />
+
+        <label for="Email">Email</label>
+        <input type="email" id="Email" name="Email" placeholder="you@example.com" />
+
+        <label for="ContactNumber">Contact Number</label>
+        <input type="text" id="ContactNumber" name="ContactNumber" placeholder="09xxxxxxxxx" />
+
+        <button type="submit">Submit Report</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const departmentSelect = document.getElementById("Department");
+    const sectorContainer = document.getElementById("SectorContainer");
+    const form = document.getElementById("index");
+    const modal = document.getElementById("successModal");
+    const closeBtn = document.querySelector(".close-button");
+
+    // Show sector dropdown if Production is selected
+    departmentSelect.addEventListener("change", function () {
+      sectorContainer.style.display = this.value === "Production" ? "block" : "none";
+    });
+
+    // Handle form submission with AJAX
+    form.addEventListener("submit", function (e) {
+      e.preventDefault(); // prevent normal reload
+
+      const formData = new FormData(form);
+
+      fetch("submit-near-miss.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        // ✅ Show popup modal
+        modal.style.display = "block";
+
+        // Optionally reset the form
+        form.reset();
+        sectorContainer.style.display = "none";
+      })
+      .catch(error => {
+        alert("❌ There was an error submitting the form. Please try again.");
+        console.error(error);
+      });
+    });
+
+    // Modal close events
+    closeBtn.addEventListener("click", function() {
+      modal.style.display = "none";
+    });
+
+    window.addEventListener("click", function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+
+
+</body>
+</html>
