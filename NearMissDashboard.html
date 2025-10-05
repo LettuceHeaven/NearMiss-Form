@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Near Miss Report Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* 🔹 General Styling */
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6fb;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2c2f9c, #1a1c6e);
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 🔹 Dashboard Layout */
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 25px;
+      margin: 30px auto;
+      max-width: 1200px;
+      justify-content: center;
+    }
+
+    .card {
+      flex: 1 1 360px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card h3 {
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #2c2f9c;
+      border-left: 4px solid #2c2f9c;
+      padding-left: 10px;
+    }
+
+    .card canvas {
+      max-height: 240px;
+    }
+
+    /* 🔹 Table Styling */
+    .table-card {
+      margin: 30px auto;
+      max-width: 1200px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 25px;
+    }
+
+    .table-card h3 {
+      margin-bottom: 15px;
+      font-size: 20px;
+      color: #2c2f9c;
+      border-left: 4px solid #2c2f9c;
+      padding-left: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #2c2f9c;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    tr:hover {
+      background: #eef2ff;
+    }
+
+    button.details-btn {
+      padding: 7px 14px;
+      border: none;
+      background: #2c2f9c;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 13px;
+    }
+
+    button.details-btn:hover {
+      background: #1a1c6e;
+    }
+
+    /* 🔹 Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 70%;
+      max-width: 650px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      color: #2c2f9c;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+
+    .modal-content p {
+      margin: 10px 0;
+      font-size: 15px;
+    }
+
+    .close {
+      float: right;
+      font-size: 26px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .close:hover {
+      color: #2c2f9c;
+    }
+  </style>
+</head>
+<body>
+  <header>📊 Near Miss Report Dashboard</header>
+
+  <!-- 🔹 Dashboard Charts -->
+  <div class="dashboard">
+    <div class="card">
+      <h3>Reports by Department</h3>
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Near Miss Distribution</h3>
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 🔹 Incident Table -->
+  <div class="table-card">
+    <h3>Incident Reports</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Type of Report</th>
+          <th>Department</th>
+          <th>Location</th>
+          <th>Reported By</th>
+          <th>Employee ID</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- 🔹 Modal -->
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Incident Details</h2>
+      <p><b>ID:</b> <span id="modal-id"></span></p>
+      <p><b>Date:</b> <span id="modal-date"></span></p>
+      <p><b>Type of Report:</b> <span id="modal-report"></span></p>
+      <p><b>Type of Concern:</b> <span id="modal-concern"></span></p>
+      <p><b>Location:</b> <span id="modal-location"></span></p>
+      <p><b>Description:</b> <span id="modal-desc"></span></p>
+      <p><b>Action Taken:</b> <span id="modal-action"></span></p>
+      <p><b>Reported By:</b> <span id="modal-reported"></span></p>
+    </div>
+  </div>
+
+  <script>
+    // 🔹 Fetch data from PHP backend
+    fetch("dashboard.php")
+      .then(res => res.json())
+      .then(data => {
+        const chartData = data.chartData;
+        const tableData = data.tableData;
+
+        // Fill Table
+        const tbody = document.getElementById("table-body");
+        tbody.innerHTML = tableData.map(row => `
+          <tr>
+            <td>${row.id}</td>
+            <td>${row.DateofIncedent}</td>
+            <td>${row.TypeofReport}</td>
+            <td>${row.Department}</td>
+            <td>${row.Location}</td>
+            <td>${row.ReportedBy}</td>
+            <td>${row.EmployeeID}</td>
+            <td>
+              <button class="details-btn"
+                data-id="${row.id}"
+                data-date="${row.DateofIncedent}"
+                data-report="${row.TypeofReport}"
+                data-concern="${row.TypeofConcern}"
+                data-location="${row.Location}"
+                data-desc="${row.Descricbe}"
+                data-action="${row.ActionTaken}"
+                data-reported="${row.ReportedBy}"
+              >Details</button>
+            </td>
+          </tr>
+        `).join("");
+
+        // Charts
+        const labels = chartData.map(item => item.Department);
+        const values = chartData.map(item => item.count);
+
+        new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: { 
+            labels, 
+            datasets: [{ 
+              label: "Reports", 
+              data: values, 
+              backgroundColor: "#2c2f9c" 
+            }] 
+          }
+        });
+
+        new Chart(document.getElementById("pieChart"), {
+          type: "pie",
+          data: { 
+            labels, 
+            datasets: [{ 
+              data: values, 
+              backgroundColor: ["#2c2f9c", "#1abc9c", "#f39c12", "#e74c3c", "#9b59b6", "#34495e"] 
+            }] 
+          }
+        });
+
+        // Modal logic
+        const modal = document.getElementById("detailsModal");
+        const closeBtn = document.querySelector(".close");
+        document.querySelectorAll(".details-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.getElementById("modal-id").textContent = btn.dataset.id;
+            document.getElementById("modal-date").textContent = btn.dataset.date;
+            document.getElementById("modal-report").textContent = btn.dataset.report;
+            document.getElementById("modal-concern").textContent = btn.dataset.concern;
+            document.getElementById("modal-location").textContent = btn.dataset.location;
+            document.getElementById("modal-desc").textContent = btn.dataset.desc;
+            document.getElementById("modal-action").textContent = btn.dataset.action;
+            document.getElementById("modal-reported").textContent = btn.dataset.reported;
+            modal.style.display = "block";
+          });
+        });
+        closeBtn.onclick = () => modal.style.display = "none";
+        window.onclick = e => { if (e.target == modal) modal.style.display = "none"; };
+      });
+  </script>
+</body>
+</html>
